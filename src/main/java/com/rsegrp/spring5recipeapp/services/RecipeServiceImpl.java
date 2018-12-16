@@ -1,20 +1,31 @@
 package com.rsegrp.spring5recipeapp.services;
 
+import com.rsegrp.spring5recipeapp.commands.RecipeDTO;
+import com.rsegrp.spring5recipeapp.converters.RecipeDTOToEntity;
+import com.rsegrp.spring5recipeapp.converters.RecipeEntityToDTO;
 import com.rsegrp.spring5recipeapp.domain.Recipe;
 import com.rsegrp.spring5recipeapp.repositories.RecipeRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class RecipeServiceImpl implements RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final RecipeDTOToEntity recipeDTOToEntity;
+    private final RecipeEntityToDTO recipeEntityToDTO;
 
-    public RecipeServiceImpl(RecipeRepository recipeRepository) {
+    public RecipeServiceImpl(RecipeRepository recipeRepository, RecipeDTOToEntity recipeDTOToEntity,
+                             RecipeEntityToDTO recipeEntityToDTO) {
         this.recipeRepository = recipeRepository;
+        this.recipeDTOToEntity = recipeDTOToEntity;
+        this.recipeEntityToDTO = recipeEntityToDTO;
     }
 
     @Override
@@ -35,4 +46,26 @@ public class RecipeServiceImpl implements RecipeService {
 
         return recipe.get();
     }
+
+    @Transactional
+    @Override
+    public RecipeDTO saveRecipeDTO(RecipeDTO recipeDTO) {
+        Recipe detachedRecipe = recipeDTOToEntity.convert(recipeDTO);
+
+        Recipe savedRecipe = recipeRepository.save(detachedRecipe);
+
+        return recipeEntityToDTO.convert(savedRecipe);
+    }
+
+    @Override
+    @Transactional
+    public RecipeDTO findByIdDTO(Long id) {
+        return recipeEntityToDTO.convert(findById(id));
+    }
+
+    @Override
+    public void deleteById(Long id){
+        recipeRepository.deleteById(id);
+    }
+
 }

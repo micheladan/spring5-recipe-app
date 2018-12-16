@@ -9,7 +9,7 @@ public class Notes {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long Id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval=true)
     private Recipe recipe;
 
     @Lob               // datatype for storing large objects.
